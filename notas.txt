@@ -1,0 +1,22 @@
+para crear un nuevo poryecto de API:
+dotnet webapi -o "nombre"
+
+correr el proyecto en local
+dotnet wacth run
+
+entityframework es el ORM de .net
+
+
+nuget packageds
+entityframework sqlserver
+ " "            core tools 
+
+
+// antes de corre cualquier comando de EntityFramework (ef) se debe instalar la herramienta del mismo
+dotnet tool install --global dotnet-ef
+
+// genra el codigo para crear la BD
+ donet ef migrations add init 
+
+// aplcia el codigo
+ dotnet ef database update
