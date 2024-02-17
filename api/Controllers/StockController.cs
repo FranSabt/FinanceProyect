@@ -6,7 +6,7 @@ using api.Data;
 using api.Dtos.Stock;
 using api.Interfaces;
 using api.Mappers;
-using api.models;
+using api.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,9 +26,12 @@ namespace api.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult>  GetAll()
+        public async Task<IActionResult>  GetAll([FromQuery] QueryObject queryObject)
         {
-            var stock = await _stockRepository.GetAllAsync();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var stock = await _stockRepository.GetAllAsync(queryObject);
 
             var stockResult = stock.Select(s => s.ToStockDto());
 
@@ -51,6 +54,9 @@ namespace api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var stock =  stockDto.ToStockFromCreateDTO();
             var stockModel = await _stockRepository.CreateAsync(stock);
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDto());
@@ -58,9 +64,12 @@ namespace api.Controllers
 
 
         [HttpPut]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateRequestDto update)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+                
             var stockToUpdate = await _stockRepository.DeleteAsync(id);
 
             if (stockToUpdate == null) 
@@ -71,7 +80,7 @@ namespace api.Controllers
 
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             var stockToDelete = await _context.Stocks.FirstOrDefaultAsync( x => x.Id == id);
@@ -81,5 +90,11 @@ namespace api.Controllers
 
             return NoContent();
         }
+
+
+        // public async Task<bool> CheckStock(int id)
+        // {
+        //     return await _stockRepository.CheckStockAsync(id);
+        // }
     }
 }

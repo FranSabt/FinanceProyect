@@ -19,6 +19,17 @@ namespace api.models
             };
         }
 
+        public static Comment ToCommentFromCreate(this CreateCommentDto commentDto, int stockID)
+        {
+            return new Comment
+            {
+                StockId = stockID,
+                Title = commentDto.Title,
+                Content = commentDto.Content,
+            };
+        }
+
+
         // public static Comment ToCommentFromCreateDto(this CommentDto commentDto)
         // {
         //     StockId = commentModel.StockId,

@@ -1,6 +1,34 @@
 @api_HostAddress = http://localhost:5199
 
-GET {{api_HostAddress}}/weatherforecast/
+GET {{api_HostAddress}}/api/stock/
 Accept: application/json
 
 ###
+GET {{api_HostAddress}}/api/comment
+
+
+###
+GET {{api_HostAddress}}/api/comment/1002
+
+###
+POST {{api_HostAddress}}/api/comment/3
+Content-Type: application/json
+
+{
+    "title": "Pedo!",
+    "content": 123456789
+}
+
+
+###
+DELETE  {{api_HostAddress}}/api/comment/1005
+Content-Type: application/json
+
+###
+PUT   {{api_HostAddress}}/api/comment/1006
+Content-Type: application/json
+
+{
+    "title": "Pedo!",
+    "content": "Brrrrrrh"
+}

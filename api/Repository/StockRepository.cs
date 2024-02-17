@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Stock;
+using api.Helpers;
 using api.Interfaces;
 using api.models;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,17 @@ namespace api.Repository
             _context = context;
         }
 
+        public async Task<bool> CheckStockAsync(int id)
+        {
+            var stock = await _context.Stocks.AnyAsync(s => s.Id == id);
+
+            if (stock)
+                return true;
+            
+            else 
+                return false;
+        }
+
         public async Task<Stock> CreateAsync(Stock stockModel)
         {
             await _context.Stocks.AddAsync(stockModel);
@@ -30,9 +42,37 @@ namespace api.Repository
             return await _context.Stocks.FirstOrDefaultAsync( x => x.Id == id);
         }
 
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
-            return await _context.Stocks.Include(c => c.Comments).ToListAsync();
+            var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(query.CompanyName))
+            {
+                stocks = stocks.Where(s => s.CompanyName.Contains(query.CompanyName));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Symbol))
+            {
+                stocks = stocks.Where(s => s.Symbol.Contains(query.Symbol));
+            }
+
+            if (!string.IsNullOrWhiteSpace(query.Sortby))
+            {
+                if (query.Sortby.Equals("Symbol", StringComparison.OrdinalIgnoreCase))
+                {
+                    stocks = query.Descending ? stocks.OrderByDescending(s => s.Symbol) : stocks.OrderBy(s => s.Symbol);
+                }
+                
+                if (query.Sortby.Equals("CompanyName", StringComparison.OrdinalIgnoreCase))
+                {
+                    stocks = query.Descending ? stocks.OrderByDescending(s => s.Symbol) : stocks.OrderBy(s => s.Symbol);
+                }
+            }
+
+            var skipNUmber = (query.PageNumber - 1) * query.PageZise;
+
+            return await stocks.Skip(skipNUmber).Take(query.PageZise).ToListAsync();
+
         }
 
         public async Task<Stock?> GetByIdAsync(int id)
