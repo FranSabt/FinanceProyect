@@ -84,9 +84,11 @@ builder.Services.AddAuthentication(options => {
         )
     };
 });
+
 builder.Services.AddScoped<IStockRepository, StockRepository>();
 builder.Services.AddScoped<ICommentRepository, Commentrepository>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IPortfolioRepository, PorfolioRepository>();
 
 var app = builder.Build();
 
