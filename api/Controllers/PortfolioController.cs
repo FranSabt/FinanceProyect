@@ -42,5 +42,40 @@ namespace api.Controllers
 
 
         }
+
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> PostPortfolio(string symbol)
+        {
+            var username = User.GetUserName();
+
+            var appUser = await _userManager.FindByNameAsync(username);
+
+            var stock =  await _stockRepository.GetBySymbolAsync(symbol);
+
+            if (stock == null)
+                return BadRequest("No stock with that symbol");
+
+            var userPortfolio = await _portfolioRepository.GetAllUserPortfolioAsync(appUser);
+
+            if (userPortfolio.Any(e => e.Symbol.ToLower() == symbol.ToLower()))
+                return BadRequest($"The symbol '{symbol}' is already in use");
+
+            var portfolioModel = new Portfolio
+            {
+                StockId = stock.Id,
+                AppUserId = appUser.Id,
+                AppUser = appUser,
+                Stock = stock,
+            };
+
+            var portfolio = await _portfolioRepository.CreateAsync(portfolioModel);
+
+            if (portfolio == null)
+                return BadRequest("Portfolio not create");
+
+            return Ok(portfolio);
+
+        }
     }
 }
