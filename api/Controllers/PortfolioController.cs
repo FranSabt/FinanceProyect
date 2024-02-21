@@ -51,6 +51,9 @@ namespace api.Controllers
 
             var appUser = await _userManager.FindByNameAsync(username);
 
+            if (appUser == null)
+                return BadRequest("No user");
+
             var stock =  await _stockRepository.GetBySymbolAsync(symbol);
 
             if (stock == null)
@@ -76,6 +79,29 @@ namespace api.Controllers
 
             return Ok(portfolio);
 
+        }
+
+        [HttpDelete]
+        [Authorize]
+        public async Task<IActionResult> DeletePortfolio(int id)
+        {
+            var username = User.GetUserName();
+            var appUser = await _userManager.FindByNameAsync(username);
+
+            if (appUser == null)
+                return BadRequest();
+            
+            var stock = await _stockRepository.GetByIdAsync(id);
+
+            if (stock == null)
+                return BadRequest("Stock don't exist");
+
+            var portfolio = await _portfolioRepository.DeletePortfolioAsync(stock.Id, appUser.Id);
+
+            if (portfolio == null)
+                BadRequest("Portfolio dont exist");
+            
+            return NoContent();
         }
     }
 }
